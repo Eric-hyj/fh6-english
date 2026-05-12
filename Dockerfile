@@ -3,7 +3,7 @@ WORKDIR /app
 COPY backend/package.json backend/package-lock.json ./
 RUN npm ci --ignore-scripts
 COPY backend/ .
-RUN mkdir -p /app/src
+RUN mkdir -p /app/src /app/public
 RUN npm run build
 
 FROM node:20-alpine
