@@ -2,11 +2,12 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { ArrowRight, Swords, Calculator, Map, Trophy, Users, Zap, Crown, Clock, TrendingUp, Star, ChevronRight, Sparkles, Gamepad2, Gauge, Sun, Mountain } from 'lucide-react'
+import { ArrowRight, Swords, Calculator, Map, Trophy, Users, Zap, Crown, Clock, TrendingUp, Star, ChevronRight, Sparkles, Gamepad2, Gauge, Sun, Mountain, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { GAME_LAUNCH_DATE } from '@/lib/constants'
+import { api } from '@/lib/api'
 
 const FEATURED_GUIDES = [
   { title: 'FH6 Beginner Guide: Everything You Need to Know', category: 'Beginner', reads: '12.4k', slug: 'fh6-beginner-guide' },
@@ -83,6 +84,16 @@ function CountdownTimer() {
 }
 
 export default function HomePage() {
+  const [featuredGuides, setFeaturedGuides] = useState<any[]>([])
+  const [guidesLoading, setGuidesLoading] = useState(true)
+
+  useEffect(() => {
+    api.guides.list({ pageSize: 6 }).then((res: any) => {
+      setFeaturedGuides(res.data.map((item: any) => ({ id: item.id, ...item })))
+    }).catch(() => {
+      setFeaturedGuides([])
+    }).finally(() => setGuidesLoading(false))
+  }, [])
   return (
     <>
       {/* ──────────── HERO ──────────── */}
@@ -269,27 +280,37 @@ export default function HomePage() {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {FEATURED_GUIDES.map((guide) => (
-              <Link key={guide.slug} href={`/guides/${guide.slug}`}>
-                <Card className="card-hover h-full">
-                  <CardHeader>
-                    <div className="flex items-center justify-between mb-2">
-                      <Badge variant="secondary" className="text-[10px]">{guide.category}</Badge>
-                      <span className="text-xs text-muted-foreground flex items-center gap-1">
-                        <TrendingUp className="h-3 w-3" />
-                        {guide.reads} reads
-                      </span>
-                    </div>
-                    <CardTitle className="text-base leading-snug">{guide.title}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center text-sm text-brand-400 font-medium">
-                      Read Guide <ChevronRight className="h-3.5 w-3.5 ml-1" />
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
+            {guidesLoading ? (
+              <div className="col-span-full flex items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              </div>
+            ) : featuredGuides.length === 0 ? (
+              <div className="col-span-full text-center py-12 text-muted-foreground">
+                <p>No guides available yet. Check back soon!</p>
+              </div>
+            ) : (
+              featuredGuides.map((guide) => (
+                <Link key={guide.slug} href={`/guides/${guide.slug}`}>
+                  <Card className="card-hover h-full">
+                    <CardHeader>
+                      <div className="flex items-center justify-between mb-2">
+                        <Badge variant="secondary" className="text-[10px]">{guide.category}</Badge>
+                        <span className="text-xs text-muted-foreground flex items-center gap-1">
+                          <TrendingUp className="h-3 w-3" />
+                          {guide.reads >= 1000 ? `${(guide.reads / 1000).toFixed(1)}k` : guide.reads} reads
+                        </span>
+                      </div>
+                      <CardTitle className="text-base leading-snug">{guide.title}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex items-center text-sm text-brand-400 font-medium">
+                        Read Guide <ChevronRight className="h-3.5 w-3.5 ml-1" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))
+            )}
           </div>
         </div>
       </section>

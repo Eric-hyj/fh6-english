@@ -5,65 +5,61 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 
-// This would come from CMS in production
-const MOCK_GUIDE = {
-  title: 'FH6 Beginner Guide: Everything You Need to Know',
-  category: 'beginner',
-  date: 'May 15, 2026',
-  reads: '12.4k',
-  author: 'FH6 Guide Team',
-  content: `
-## Welcome to Forza Horizon 6
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:1337'
 
-Forza Horizon 6 is here, and it's bigger than ever. Whether you're a veteran of the series or a complete newcomer, this guide will help you hit the ground running.
+type GuideData = {
+  id: number
+  title: string
+  slug: string
+  category: string
+  content: string
+  excerpt: string
+  reads: number
+  author: string
+  publishedAt: string
+  related?: { id: number; title: string; slug: string }[]
+}
 
-## Getting Started
+async function fetchGuide(slug: string): Promise<GuideData | null> {
+  try {
+    const res = await fetch(
+      `${API_BASE}/api/guides?filters[slug][$eq]=${slug}&populate=*`,
+      { next: { revalidate: 60 } }
+    )
+    if (!res.ok) return null
+    const json = await res.json()
+    if (!json.data || json.data.length === 0) return null
+    const item = json.data[0]
+    return {
+      id: item.id,
+      title: item.title,
+      slug: item.slug,
+      category: item.category,
+      content: item.content,
+      excerpt: item.excerpt,
+      reads: item.reads,
+      author: item.author,
+      publishedAt: item.publishedAt,
+      related: item.related?.map((r: any) => ({
+        id: r.id,
+        title: r.title,
+        slug: r.slug,
+      })),
+    }
+  } catch {
+    return null
+  }
+}
 
-### Choose Your First Car Wisely
+function formatReads(n: number) {
+  if (n >= 1000) return `${(n / 1000).toFixed(1)}k`
+  return String(n)
+}
 
-Your first car choice matters more than you think. While it's tempting to pick the flashiest option, we recommend choosing a versatile vehicle that can handle multiple race types.
-
-**Top starter picks:**
-- **Toyota GR Supra 2025** — Best all-rounder for early game
-- **Honda Civic Type R** — Excellent handling, great for street races
-- **Ford Focus RS** — Perfect for mixed terrain events
-
-### Understanding the Map
-
-The FH6 map is divided into several distinct biomes. Each area has unique events, collectibles, and driving conditions. Spend your first hour exploring and unlocking fast travel points.
-
-### Master the Basics
-
-Before diving into competitive racing, spend time in the Festival Playlist to learn:
-- Braking points and racing lines
-- Drift mechanics
-- Off-road driving techniques
-- Car customization basics
-
-## Pro Tips for New Players
-
-1. **Complete the intro festival** before exploring — unlocks core features
-2. **Save your credits** for a second car rather than upgrading your first
-3. **Join a club** early for bonus XP and credits
-4. **Set waypoints** for fast travel board locations
-5. **Check the Festival Playlist** daily for limited-time rewards
-
-## Common Questions
-
-**Q: What's the fastest way to earn credits?**
-A: Complete the Festival Playlist events and auction duplicate cars.
-
-**Q: Should I buy or earn cars?**
-A: Earn what you can through races, buy only when necessary for specific events.
-
-**Q: Is the VIP membership worth it?**
-A: Yes, if you plan to play more than 20 hours — the double credit bonus pays for itself.
-`,
-  related: [
-    { title: 'Best Starter Cars in Forza Horizon 6', slug: 'best-starter-cars-fh6' },
-    { title: 'How to Get Unlimited Credits Fast in FH6', slug: 'unlimited-credits-fh6' },
-    { title: 'All Barn Finds Locations Guide', slug: 'all-barn-finds-locations-fh6' },
-  ],
+function formatDate(iso: string) {
+  const d = new Date(iso)
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+  return `${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`
 }
 
 function renderMarkdown(md: string) {
@@ -90,8 +86,8 @@ function renderMarkdown(md: string) {
 
 export default async function GuideDetailPage(props: { params: Promise<{ slug: string }> }) {
   const params = await props.params
-  // In production, fetch from Strapi CMS
-  if (!MOCK_GUIDE) notFound()
+  const guide = await fetchGuide(params.slug)
+  if (!guide) notFound()
 
   return (
     <div className="container-custom py-10">
@@ -101,7 +97,7 @@ export default async function GuideDetailPage(props: { params: Promise<{ slug: s
         <ChevronRight className="h-3 w-3" />
         <Link href="/guides" className="hover:text-foreground">Guides</Link>
         <ChevronRight className="h-3 w-3" />
-        <span className="text-foreground truncate max-w-[200px]">{MOCK_GUIDE.title}</span>
+        <span className="text-foreground truncate max-w-[200px]">{guide.title}</span>
       </div>
 
       <div className="grid lg:grid-cols-[1fr_300px] gap-10">
@@ -113,20 +109,20 @@ export default async function GuideDetailPage(props: { params: Promise<{ slug: s
 
           <header className="mb-8">
             <div className="flex items-center gap-3 mb-4">
-              <Badge variant="secondary">{MOCK_GUIDE.category}</Badge>
+              <Badge variant="secondary">{guide.category}</Badge>
               <span className="text-sm text-muted-foreground flex items-center gap-1">
-                <Clock className="h-3.5 w-3.5" /> {MOCK_GUIDE.date}
+                <Clock className="h-3.5 w-3.5" /> {formatDate(guide.publishedAt)}
               </span>
               <span className="text-sm text-muted-foreground flex items-center gap-1">
-                <TrendingUp className="h-3.5 w-3.5" /> {MOCK_GUIDE.reads} reads
+                <TrendingUp className="h-3.5 w-3.5" /> {formatReads(guide.reads)} reads
               </span>
             </div>
             <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight leading-tight mb-4">
-              {MOCK_GUIDE.title}
+              {guide.title}
             </h1>
             <div className="flex items-center gap-3 text-sm text-muted-foreground">
               <BookOpen className="h-4 w-4" />
-              <span>By {MOCK_GUIDE.author}</span>
+              <span>By {guide.author}</span>
               <span className="text-border">|</span>
               <span>8 min read</span>
             </div>
@@ -134,7 +130,7 @@ export default async function GuideDetailPage(props: { params: Promise<{ slug: s
 
           <div
             className="prose-custom max-w-none"
-            dangerouslySetInnerHTML={{ __html: renderMarkdown(MOCK_GUIDE.content) }}
+            dangerouslySetInnerHTML={{ __html: renderMarkdown(guide.content) }}
           />
 
           {/* Share */}
@@ -149,21 +145,23 @@ export default async function GuideDetailPage(props: { params: Promise<{ slug: s
         {/* Sidebar */}
         <aside className="space-y-6">
           {/* Related Guides */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Related Guides</CardTitle>
-            </CardHeader>
-            <CardContent className="pt-2 space-y-3">
-              {MOCK_GUIDE.related.map((r) => (
-                <Link key={r.slug} href={`/guides/${r.slug}`}>
-                  <div className="group flex items-start gap-2 p-2 rounded-lg hover:bg-accent transition-colors">
-                    <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5 group-hover:text-brand-400 transition-colors" />
-                    <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">{r.title}</span>
-                  </div>
-                </Link>
-              ))}
-            </CardContent>
-          </Card>
+          {guide.related && guide.related.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Related Guides</CardTitle>
+              </CardHeader>
+              <CardContent className="pt-2 space-y-3">
+                {guide.related.map((r) => (
+                  <Link key={r.slug} href={`/guides/${r.slug}`}>
+                    <div className="group flex items-start gap-2 p-2 rounded-lg hover:bg-accent transition-colors">
+                      <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5 group-hover:text-brand-400 transition-colors" />
+                      <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">{r.title}</span>
+                    </div>
+                  </Link>
+                ))}
+              </CardContent>
+            </Card>
+          )}
 
           {/* Premium CTA */}
           <Card className="bg-gradient-to-br from-brand-600/10 via-amber-600/5 to-card border-brand-600/20">
