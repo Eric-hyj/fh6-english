@@ -1,4 +1,4 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:1337'
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://fh6-english-production.up.railway.app'
 
 async function fetchAPI<T = any>(
   endpoint: string,

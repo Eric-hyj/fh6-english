@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:1337'
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://fh6-english-production.up.railway.app'
 
 type GuideData = {
   id: number
