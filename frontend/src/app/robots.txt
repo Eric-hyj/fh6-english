@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /membership/
+Disallow: /api/
+Disallow: /payment/
+
+Sitemap: https://fh6tools.com/sitemap.xml

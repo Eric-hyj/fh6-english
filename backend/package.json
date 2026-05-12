@@ -1,0 +1,24 @@
+{
+  "name": "fh6-backend",
+  "private": true,
+  "version": "0.1.0",
+  "description": "FH6 Guide Strapi CMS Backend",
+  "scripts": {
+    "develop": "strapi develop",
+    "start": "strapi start",
+    "build": "strapi build",
+    "strapi": "strapi"
+  },
+  "dependencies": {
+    "@strapi/strapi": "5.10.0",
+    "@strapi/plugin-users-permissions": "5.10.0",
+    "@strapi/plugin-i18n": "5.10.0",
+    "@strapi/plugin-cloud": "5.10.0",
+    "@strapi/provider-upload-cloudinary": "5.10.0",
+    "pg": "^8.13.0",
+    "better-sqlite3": "^11.7.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
