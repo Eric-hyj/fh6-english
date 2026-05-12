@@ -1,8 +1,28 @@
-FROM node:20-alpine
+FROM node:20-alpine AS build
 WORKDIR /app
 COPY backend/package.json backend/package-lock.json ./
 RUN npm ci --ignore-scripts
 COPY backend/ .
+
+# strapi build requires these env vars even during image build
+ARG APP_KEYS=dummy,dummy,dummy,dummy
+ARG ADMIN_JWT_SECRET=dummy
+ARG API_TOKEN_SALT=dummy
+ARG TRANSFER_TOKEN_SALT=dummy
+ENV APP_KEYS=$APP_KEYS \
+    ADMIN_JWT_SECRET=$ADMIN_JWT_SECRET \
+    API_TOKEN_SALT=$API_TOKEN_SALT \
+    TRANSFER_TOKEN_SALT=$TRANSFER_TOKEN_SALT
+
+RUN npm run build
+
+FROM node:20-alpine
+WORKDIR /app
+COPY --from=build /app/node_modules ./node_modules
+COPY --from=build /app/build ./build
+COPY --from=build /app/config ./config
+COPY --from=build /app/public ./public
+COPY --from=build /app/package.json ./package.json
+COPY --from=build /app/src ./src
 EXPOSE 1337
-RUN mkdir -p /app/src
-CMD ["sh", "-c", "npm run build && npm run start"]
+CMD ["npm", "run", "start"]
