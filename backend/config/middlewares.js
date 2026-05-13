@@ -1,7 +1,17 @@
 module.exports = [
   'strapi::logger',
   'strapi::errors',
-  'strapi::security',
+  {
+    name: 'strapi::security',
+    config: {
+      contentSecurityPolicy: {
+        useDefaults: true,
+        directives: {
+          'connect-src': ["'self'", 'https:'],
+        },
+      },
+    },
+  },
   {
     name: 'strapi::cors',
     config: {
@@ -13,6 +23,15 @@ module.exports = [
   'strapi::poweredBy',
   'strapi::query',
   'strapi::body',
-  'strapi::session',
+  {
+    name: 'strapi::session',
+    config: {
+      key: 'koa.sess',
+      maxAge: 86400000,
+      httpOnly: true,
+      secure: false,
+      sameSite: 'lax' as const,
+    },
+  },
   'strapi::public',
 ]
