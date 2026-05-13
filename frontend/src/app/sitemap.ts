@@ -6,7 +6,6 @@ const STRAPI_URL = process.env.NEXT_PUBLIC_API_URL || 'https://fh6-english-produ
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = SITE_CONFIG.url
 
-  // 动态从 Strapi 获取真实文章 slug
   let guideSlugs: string[] = []
   try {
     const controller = new AbortController()
@@ -21,31 +20,44 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       guideSlugs = (json.data || []).map((item: any) => item.slug).filter(Boolean)
     }
   } catch {
-    // Strapi 挂了就只用静态页面，总比塞一堆 404 强
+    // Strapi 挂了就只用静态页面
   }
 
-  const staticPages = [
-    { path: '', changefreq: 'weekly' as const, priority: 1.0 },
-    { path: '/guides', changefreq: 'daily' as const, priority: 0.9 },
-    { path: '/tools/tuning-calculator', changefreq: 'daily' as const, priority: 0.9 },
-    { path: '/tools/collectibles-map', changefreq: 'daily' as const, priority: 0.9 },
+  const entries: MetadataRoute.Sitemap = [
+    {
+      url: baseUrl,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 1,
+    },
+    {
+      url: `${baseUrl}/guides`,
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/tools/tuning-calculator`,
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/tools/collectibles-map`,
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.9,
+    },
   ]
 
-  const sitemapEntries: MetadataRoute.Sitemap = staticPages.map(({ path, changefreq, priority }) => ({
-    url: `${baseUrl}${path}`,
-    lastModified: new Date(),
-    changeFrequency: changefreq,
-    priority,
-  }))
-
   for (const slug of guideSlugs) {
-    sitemapEntries.push({
+    entries.push({
       url: `${baseUrl}/guides/${slug}`,
       lastModified: new Date(),
-      changeFrequency: 'weekly' as const,
+      changeFrequency: 'weekly',
       priority: 0.8,
     })
   }
 
-  return sitemapEntries
+  return entries
 }
