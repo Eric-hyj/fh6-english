@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import { SITE_CONFIG } from '@/lib/constants'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
+import ClientLayout from '@/components/ClientLayout'
 import StructuredData from '@/components/StructuredData'
 import GoogleAnalytics from '@/components/GoogleAnalytics'
 import '@/styles/globals.css'
@@ -66,11 +67,13 @@ export default function RootLayout({
       <body className="min-h-screen flex flex-col antialiased">
         <StructuredData />
         <GoogleAnalytics />
-        <Header />
-        <main className="flex-1">
-          {children}
-        </main>
-        <Footer />
+        <ClientLayout>
+          <Header />
+          <main className="flex-1">
+            {children}
+          </main>
+          <Footer />
+        </ClientLayout>
       </body>
     </html>
   )

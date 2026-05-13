@@ -2,6 +2,14 @@ module.exports = ({ env }) => ({
   'users-permissions': {
     config: {
       jwtSecret: env('JWT_SECRET'),
+      providers: {
+        google: {
+          enabled: env.bool('GOOGLE_ENABLED', false),
+          key: env('GOOGLE_CLIENT_ID'),
+          secret: env('GOOGLE_CLIENT_SECRET'),
+          redirectUri: env('GOOGLE_REDIRECT_URI', 'https://fh6-english.vercel.app/membership/auth/callback'),
+        },
+      },
     },
   },
   upload: {

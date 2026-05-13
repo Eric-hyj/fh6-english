@@ -2,12 +2,14 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Menu, X, Crown, Swords } from 'lucide-react'
+import { Menu, X, Crown, Swords, LogOut, User } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { NAV_ITEMS } from '@/lib/constants'
+import { useAuth } from '@/context/AuthContext'
 
 export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false)
+  const { user, loading, logout } = useAuth()
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-xl">
@@ -35,15 +37,35 @@ export default function Header() {
         </nav>
 
         <div className="hidden md:flex items-center gap-3">
-          <Link href="/membership/login">
-            <Button variant="ghost" size="sm">Log in</Button>
-          </Link>
-          <Link href="/membership/register">
-            <Button variant="gold" size="sm" className="gap-1.5">
-              <Crown className="h-4 w-4" />
-              Premium
-            </Button>
-          </Link>
+          {loading ? null : user ? (
+            <>
+              <Link href="/membership/portal" className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-accent transition-colors">
+                <div className="h-7 w-7 rounded-full bg-brand-600 flex items-center justify-center">
+                  <User className="h-4 w-4 text-white" />
+                </div>
+                <span className="text-sm font-medium max-w-[100px] truncate">{user.username}</span>
+              </Link>
+              <button
+                onClick={logout}
+                className="p-2 text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-accent"
+                title="Log out"
+              >
+                <LogOut className="h-4 w-4" />
+              </button>
+            </>
+          ) : (
+            <>
+              <Link href="/membership/login">
+                <Button variant="ghost" size="sm">Log in</Button>
+              </Link>
+              <Link href="/membership/register">
+                <Button variant="gold" size="sm" className="gap-1.5">
+                  <Crown className="h-4 w-4" />
+                  Premium
+                </Button>
+              </Link>
+            </>
+          )}
         </div>
 
         <button
@@ -69,15 +91,34 @@ export default function Header() {
               </Link>
             ))}
             <hr className="border-border my-3" />
-            <Link href="/membership/login" className="block px-4 py-2.5" onClick={() => setMobileOpen(false)}>
-              <Button variant="ghost" className="w-full">Log in</Button>
-            </Link>
-            <Link href="/membership/register" className="block px-4" onClick={() => setMobileOpen(false)}>
-              <Button variant="gold" className="w-full gap-2">
-                <Crown className="h-4 w-4" />
-                Get Premium
-              </Button>
-            </Link>
+            {user ? (
+              <>
+                <Link href="/membership/portal" className="block px-4 py-2.5" onClick={() => setMobileOpen(false)}>
+                  <div className="flex items-center gap-2">
+                    <User className="h-4 w-4" />
+                    <span className="font-medium">{user.username}</span>
+                  </div>
+                </Link>
+                <button
+                  onClick={() => { logout(); setMobileOpen(false) }}
+                  className="flex items-center gap-2 px-4 py-2.5 text-sm text-muted-foreground w-full"
+                >
+                  <LogOut className="h-4 w-4" /> Log out
+                </button>
+              </>
+            ) : (
+              <>
+                <Link href="/membership/login" className="block px-4 py-2.5" onClick={() => setMobileOpen(false)}>
+                  <Button variant="ghost" className="w-full">Log in</Button>
+                </Link>
+                <Link href="/membership/register" className="block px-4" onClick={() => setMobileOpen(false)}>
+                  <Button variant="gold" className="w-full gap-2">
+                    <Crown className="h-4 w-4" />
+                    Get Premium
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       )}
