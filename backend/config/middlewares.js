@@ -30,7 +30,7 @@ module.exports = [
       maxAge: 86400000,
       httpOnly: true,
       secure: false,
-      sameSite: 'lax' as const,
+      sameSite: 'lax',
     },
   },
   'strapi::public',
