@@ -67,6 +67,9 @@ function renderMarkdown(md: string) {
   const html = lines.map((line) => {
     if (line.startsWith('## ')) return `<h2 class="text-2xl font-bold mt-8 mb-4 text-foreground">${line.slice(3)}</h2>`
     if (line.startsWith('### ')) return `<h3 class="text-xl font-semibold mt-6 mb-3 text-foreground">${line.slice(4)}</h3>`
+    // Image syntax: ![alt](url)
+    const imgMatch = line.match(/^!\[(.+?)\]\((.+?)\)$/)
+    if (imgMatch) return `<figure class="my-6"><img src="${imgMatch[2]}" alt="${imgMatch[1]}" class="rounded-lg w-full" loading="lazy" /><figcaption class="text-sm text-muted-foreground mt-2 text-center">${imgMatch[1]}</figcaption></figure>`
     if (line.startsWith('**') && line.endsWith('**')) return `<p class="font-bold text-foreground mt-4 mb-2">${line.slice(2, -2)}</p>`
     if (line.startsWith('- **')) {
       const match = line.match(/- \*\*(.+?)\*\*(.*)/)
