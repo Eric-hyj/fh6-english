@@ -4,4 +4,4 @@ Disallow: /membership/
 Disallow: /api/
 Disallow: /payment/
 
-Sitemap: https://fh6-english.vercel.app/sitemap.xml
+Sitemap: https://fh6-english.vercel.app/sitemap-index.xml
