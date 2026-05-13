@@ -1,9 +1,11 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import type { Metadata } from 'next'
 import { ArrowLeft, Clock, TrendingUp, Share2, BookOpen, ChevronRight } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
+import { SITE_CONFIG } from '@/lib/constants'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://fh6-english-production.up.railway.app'
 
@@ -51,6 +53,35 @@ async function fetchGuide(slug: string): Promise<GuideData | null> {
   }
 }
 
+export async function generateMetadata(
+  props: { params: Promise<{ slug: string }> }
+): Promise<Metadata> {
+  const params = await props.params
+  const guide = await fetchGuide(params.slug)
+  if (!guide) return { title: 'Guide Not Found' }
+
+  const url = `${SITE_CONFIG.url}/guides/${guide.slug}`
+
+  return {
+    title: guide.title,
+    description: guide.excerpt || guide.title,
+    alternates: { canonical: url },
+    openGraph: {
+      title: guide.title,
+      description: guide.excerpt || guide.title,
+      url,
+      type: 'article',
+      publishedTime: guide.publishedAt,
+      authors: [guide.author],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: guide.title,
+      description: guide.excerpt || guide.title,
+    },
+  }
+}
+
 function formatReads(n: number) {
   if (n >= 1000) return `${(n / 1000).toFixed(1)}k`
   return String(n)
@@ -67,7 +98,6 @@ function renderMarkdown(md: string) {
   const html = lines.map((line) => {
     if (line.startsWith('## ')) return `<h2 class="text-2xl font-bold mt-8 mb-4 text-foreground">${line.slice(3)}</h2>`
     if (line.startsWith('### ')) return `<h3 class="text-xl font-semibold mt-6 mb-3 text-foreground">${line.slice(4)}</h3>`
-    // Image syntax: ![alt](url)
     const imgMatch = line.match(/^!\[(.+?)\]\((.+?)\)$/)
     if (imgMatch) return `<figure class="my-6"><img src="${imgMatch[2]}" alt="${imgMatch[1]}" class="rounded-lg w-full" loading="lazy" referrerpolicy="no-referrer" /><figcaption class="text-sm text-muted-foreground mt-2 text-center">${imgMatch[1]}</figcaption></figure>`
     if (line.startsWith('**') && line.endsWith('**')) return `<p class="font-bold text-foreground mt-4 mb-2">${line.slice(2, -2)}</p>`
@@ -92,8 +122,45 @@ export default async function GuideDetailPage(props: { params: Promise<{ slug: s
   const guide = await fetchGuide(params.slug)
   if (!guide) notFound()
 
+  const articleJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: guide.title,
+    description: guide.excerpt,
+    author: { '@type': 'Person', name: guide.author },
+    datePublished: guide.publishedAt,
+    publisher: {
+      '@type': 'Organization',
+      name: SITE_CONFIG.name,
+      url: SITE_CONFIG.url,
+    },
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': `${SITE_CONFIG.url}/guides/${guide.slug}`,
+    },
+  }
+
+  const breadcrumbJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_CONFIG.url },
+      { '@type': 'ListItem', position: 2, name: 'Guides', item: `${SITE_CONFIG.url}/guides` },
+      { '@type': 'ListItem', position: 3, name: guide.title },
+    ],
+  }
+
   return (
     <div className="container-custom py-10">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
+
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
         <Link href="/" className="hover:text-foreground">Home</Link>

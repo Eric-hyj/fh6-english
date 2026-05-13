@@ -1,9 +1,17 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { SITE_CONFIG } from '@/lib/constants'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
+import StructuredData from '@/components/StructuredData'
+import GoogleAnalytics from '@/components/GoogleAnalytics'
 import '@/styles/globals.css'
 import 'leaflet/dist/leaflet.css'
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  themeColor: '#0a0a0b',
+}
 
 export const metadata: Metadata = {
   title: {
@@ -12,6 +20,10 @@ export const metadata: Metadata = {
   },
   description: SITE_CONFIG.description,
   metadataBase: new URL(SITE_CONFIG.url),
+  icons: {
+    icon: '/favicon.svg',
+    apple: '/favicon.svg',
+  },
   openGraph: {
     title: `${SITE_CONFIG.name} - ${SITE_CONFIG.tagline}`,
     description: SITE_CONFIG.description,
@@ -28,9 +40,19 @@ export const metadata: Metadata = {
   robots: {
     index: true,
     follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
   },
   alternates: {
     canonical: SITE_CONFIG.url,
+  },
+  other: {
+    'google-site-verification': '7hnAZIzqWDCvkU-e-PA4dka2AeR4jaSZydsp57cnrVY',
   },
 }
 
@@ -42,6 +64,8 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className="min-h-screen flex flex-col antialiased">
+        <StructuredData />
+        <GoogleAnalytics />
         <Header />
         <main className="flex-1">
           {children}
