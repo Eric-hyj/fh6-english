@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next'
+import Script from 'next/script'
 import { SITE_CONFIG } from '@/lib/constants'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
@@ -65,6 +66,11 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className="min-h-screen flex flex-col antialiased">
+        <Script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4070332439185407"
+          crossOrigin="anonymous"
+        />
         <StructuredData />
         <GoogleAnalytics />
         <ClientLayout>
