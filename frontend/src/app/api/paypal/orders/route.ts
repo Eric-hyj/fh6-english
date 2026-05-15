@@ -19,6 +19,8 @@ const PLAN_PRICES: Record<string, { amount: string; name: string }> = {
 // 获取 PayPal Access Token
 async function getPayPalToken(): Promise<string> {
   const auth = Buffer.from(`${PAYPAL_CLIENT_ID}:${PAYPAL_CLIENT_SECRET}`).toString('base64')
+  console.log('[PAYPAL] Requesting token with API:', PAYPAL_API)
+  console.log('[PAYPAL] Client ID prefix:', PAYPAL_CLIENT_ID.substring(0, 10))
   const res = await fetch(`${PAYPAL_API}/v1/oauth2/token`, {
     method: 'POST',
     headers: {
@@ -28,6 +30,10 @@ async function getPayPalToken(): Promise<string> {
     body: 'grant_type=client_credentials',
   })
   const data = await res.json()
+  console.log('[PAYPAL] Token response status:', res.status)
+  if (!data.access_token) {
+    console.error('[PAYPAL] Token error:', JSON.stringify(data))
+  }
   return data.access_token
 }
 
@@ -93,30 +99,42 @@ export async function POST(req: NextRequest) {
     }
 
     const token = await getPayPalToken()
+    if (!token) {
+      console.error('[PAYPAL] Failed to get access token')
+      return NextResponse.json({ error: 'PayPal authentication failed' }, { status: 500 })
+    }
+    console.log('[PAYPAL] Got access token:', token.substring(0, 10) + '...')
+
+    const orderBody = {
+      intent: 'CAPTURE',
+      purchase_units: [{
+        amount: {
+          currency_code: 'USD',
+          value: planInfo.amount,
+        },
+        description: `FH6 Guide - ${planInfo.name}`,
+      }],
+    }
+    console.log('[PAYPAL] Creating order:', JSON.stringify(orderBody))
+
     const order = await fetch(`${PAYPAL_API}/v2/checkout/orders`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        intent: 'CAPTURE',
-        purchase_units: [{
-          amount: {
-            currency_code: 'USD',
-            value: planInfo.amount,
-          },
-          description: `FH6 Guide - ${planInfo.name}`,
-        }],
-      }),
+      body: JSON.stringify(orderBody),
     })
     const orderData = await order.json()
+    console.log('[PAYPAL] Order response status:', order.status)
+    console.log('[PAYPAL] Order response:', JSON.stringify(orderData).substring(0, 500))
 
     if (orderData.id) {
       return NextResponse.json({ orderId: orderData.id })
     }
     return NextResponse.json({ error: 'Failed to create order', details: orderData }, { status: 500 })
   } catch (e: any) {
+    console.error('[PAYPAL] Create order error:', e)
     return NextResponse.json({ error: e.message }, { status: 500 })
   }
 }
