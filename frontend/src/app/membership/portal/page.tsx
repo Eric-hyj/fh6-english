@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { Crown, Check, ArrowRight, Star, Shield, Download, Zap, Sparkles } from 'lucide-react'
+import { Crown, Check, ArrowRight, Star, Shield, Download, Zap, Sparkles, PartyPopper } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -54,11 +55,24 @@ const PLANS = [
   },
 ]
 
-export default function MembershipPortalPage() {
+function PortalContent() {
+  const searchParams = useSearchParams()
+  const paymentSuccess = searchParams.get('payment') === 'success'
   const [billing, setBilling] = useState<'monthly' | 'yearly'>('yearly')
 
   return (
     <div className="container-custom py-10">
+      {/* Payment Success Banner */}
+      {paymentSuccess && (
+        <div className="max-w-2xl mx-auto mb-8 p-4 rounded-xl bg-green-600/10 border border-green-600/30 flex items-center gap-3">
+          <PartyPopper className="h-6 w-6 text-green-400 shrink-0" />
+          <div>
+            <h3 className="font-semibold text-green-400">Payment Successful!</h3>
+            <p className="text-sm text-muted-foreground">Welcome to FH6 Guide Premium. Your account has been upgraded.</p>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="text-center max-w-2xl mx-auto mb-12">
         <Crown className="h-12 w-12 mx-auto text-amber-400 mb-4" />
@@ -163,5 +177,13 @@ export default function MembershipPortalPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function MembershipPortalPage() {
+  return (
+    <Suspense fallback={<div className="text-center text-muted-foreground py-16">Loading...</div>}>
+      <PortalContent />
+    </Suspense>
   )
 }
