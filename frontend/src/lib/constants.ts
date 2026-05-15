@@ -2,7 +2,7 @@ export const SITE_CONFIG = {
   name: 'FH6 Guide',
   tagline: 'The Ultimate Forza Horizon 6 Resource',
   description: 'Comprehensive FH6 guides, tuning calculator, collectibles map, and expert tips. Master every race, find every Barn Find, and build the ultimate car collection.',
-  url: 'https://fh6-english.vercel.app',
+  url: 'https://fh6guide.com',
   author: 'FH6 Guide Team',
   social: {
     twitter: '@fh6guide',

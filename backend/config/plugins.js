@@ -7,7 +7,7 @@ module.exports = ({ env }) => ({
           enabled: env.bool('GOOGLE_ENABLED', false),
           key: env('GOOGLE_CLIENT_ID'),
           secret: env('GOOGLE_CLIENT_SECRET'),
-          redirectUri: env('GOOGLE_REDIRECT_URI', 'https://fh6-english.vercel.app/membership/auth/callback'),
+          redirectUri: env('GOOGLE_REDIRECT_URI', 'https://fh6guide.com/membership/auth/callback'),
         },
       },
     },

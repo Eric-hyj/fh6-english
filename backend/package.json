@@ -10,6 +10,7 @@
     "strapi": "strapi"
   },
   "dependencies": {
+    "@react-oauth/google": "^0.13.5",
     "@strapi/i18n": "5.45.1",
     "@strapi/plugin-cloud": "5.45.1",
     "@strapi/plugin-users-permissions": "5.45.1",
