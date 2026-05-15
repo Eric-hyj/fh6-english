@@ -54,7 +54,7 @@ export const metadata: Metadata = {
     canonical: SITE_CONFIG.url,
   },
   other: {
-    'google-site-verification': '7hnAZIzqWDCvkU-e-PA4dka2AeR4jaSZydsp57cnrVY',
+    'google-site-verification': 'PyPhUU9cYeSCpEXMFkK-2zyeEisSj-SSuz-RCrBPUbw',
   },
 }
 
