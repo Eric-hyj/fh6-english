@@ -1,11 +1,11 @@
 import type { Metadata, Viewport } from 'next'
-import Script from 'next/script'
 import { SITE_CONFIG } from '@/lib/constants'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import ClientLayout from '@/components/ClientLayout'
 import StructuredData from '@/components/StructuredData'
 import GoogleAnalytics from '@/components/GoogleAnalytics'
+import AdSenseScript from '@/components/AdSenseScript'
 import '@/styles/globals.css'
 import 'leaflet/dist/leaflet.css'
 
@@ -66,12 +66,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className="min-h-screen flex flex-col antialiased">
-        <Script
-          id="adsense"
-          strategy="beforeInteractive"
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4070332439185407"
-          crossOrigin="anonymous"
-        />
+        <AdSenseScript />
         <StructuredData />
         <GoogleAnalytics />
         <ClientLayout>
