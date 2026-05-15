@@ -4,7 +4,7 @@ const PAYPAL_API = process.env.PAYPAL_LIVE
   ? 'https://api-m.paypal.com'
   : 'https://api-m.sandbox.paypal.com'
 
-const PAYPAL_CLIENT_ID = process.env.PAYPAL_CLIENT_ID || ''
+const PAYPAL_CLIENT_ID = process.env.PAYPAL_CLIENT_ID || process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || ''
 const PAYPAL_CLIENT_SECRET = process.env.PAYPAL_CLIENT_SECRET || ''
 
 const STRAPI_URL = process.env.NEXT_PUBLIC_API_URL || 'https://fh6-english-production.up.railway.app'
