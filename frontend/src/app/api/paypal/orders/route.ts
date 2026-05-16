@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-const PAYPAL_API = process.env.PAYPAL_LIVE
+const PAYPAL_API = process.env.PAYPAL_LIVE === 'true'
   ? 'https://api-m.paypal.com'
   : 'https://api-m.sandbox.paypal.com'
 
